@@ -1,0 +1,45 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+lib/
+lib64/
+work/
+tmp/
+
+
+# VSCode
+.vscode
+
+
+# Environments
+.env
+env/
+ENV/
+env.bak/
+venv.bak/
+
+
+# Vim
+*.swp
+
+
+# sql
+*.sqlite3
+
+
+# Log
+*.log
+*.old
+
+
+# Output files
+*.html
+*.png
+
+
+# Project
+/certs/
+
+
+# MAC
+.DS_Store
