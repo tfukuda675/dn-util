@@ -6,6 +6,7 @@ from logging import getLogger, StreamHandler, FileHandler, Formatter, DEBUG, INF
 import click
 import pandas as pd
 import plotly.express as px
+import plotly.io as pio
 
 os.environ["PATH"] = "/Users/tfuku/Tools/miniforge3/envs/py313/bin:" + os.environ["PATH"]
 
@@ -55,6 +56,8 @@ def create_graph(csv):
 
     df = pd.read_csv(csv, parse_dates=["Date"])
 
+    html_divs = list()
+
     # グラフの見た目の共通設定
     common_layout = dict(
         plot_bgcolor="white",
@@ -92,6 +95,7 @@ def create_graph(csv):
         y="Total Area",
         color="target module",
         markers=True,
+        line_group=None,
         title="Total Area Over Time by Target Module",
         hover_data=["Impl-SfM", "Design-SfM"]
     )
@@ -115,6 +119,19 @@ def create_graph(csv):
     # PNG出力（kaleidoが必要）
     fig.write_image("total_area_plot.png")
 
+    # DIV出力
+    div_html = pio.to_html(fig,
+                            include_plotlyjs="cdn",
+                            full_html=False,
+                            config={
+                                "displaylogo": False,
+                                "displayModeBar": False,
+                            }
+                        ) 
+
+    # 各divにクラスを追加
+    html_divs.append(f'<div class="chart">{div_html}</div>\n')    
+
     del fig
 
     for module, tmp_df in df.groupby("target module"):
@@ -126,6 +143,7 @@ def create_graph(csv):
             y="Total Area",
             color="target module",
             markers=True,
+            line_group=None,
             title=f"Total Area Over Time - {module}",
             hover_data=["Impl-SfM", "Design-SfM"]
         )
@@ -149,7 +167,60 @@ def create_graph(csv):
         # PNG出力（kaleidoが必要）
         fig.write_image(f"{module}_area_plot.png")
 
+        # DIV出力
+        div_html = pio.to_html(fig,
+                                include_plotlyjs="cdn",
+                                full_html=False,
+                                config={
+                                    "displaylogo": False,
+                                    "displayModeBar": False,
+                                }
+                            ) 
+
+        # 各divにクラスを追加
+        html_divs.append(f'<div class="chart_{module}">{div_html}</div>\n')    
+
         del fig
+
+
+    # HTML全体を組み立て（2列表示のFlexboxスタイル）
+    full_html = f"""
+<html>
+  <head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <meta charset="utf-8">
+    <title>Grid Layout of Target Module Graphs</title>
+    <style>
+      body {{
+        background-color: #f9f9f9;
+        font-family: Arial, sans-serif;
+      }}
+      .chart-grid {{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(720px, 1fr));
+        gap: 20px;
+        padding: 20px;
+      }}
+      .chart {{
+        background: white;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        border-radius: 8px;
+      }}
+    </style>
+  </head>
+  <body>
+    <h1 style="text-align:center;">Total Area by Target Module</h1>
+    <div class="chart-grid">
+      {"".join(html_divs)}
+    </div>
+  </body>
+</html>
+    """
+
+    # 保存
+    with open("all_modules_2col.html", "w", encoding="utf-8") as f:
+        f.write(full_html)
 
 
 if __name__ == '__main__':
