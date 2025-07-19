@@ -226,12 +226,6 @@ class GitHubGanttChart:
                     buttons=list(
                         [
                             dict(
-                                count=7, label="1週間", step="day", stepmode="backward"
-                            ),
-                            dict(
-                                count=14, label="2週間", step="day", stepmode="backward"
-                            ),
-                            dict(
                                 count=1,
                                 label="1ヶ月",
                                 step="month",
@@ -241,6 +235,12 @@ class GitHubGanttChart:
                                 count=3,
                                 label="3ヶ月",
                                 step="month",
+                                stepmode="backward",
+                            ),
+                            dict(
+                                count=1,
+                                label="1年",
+                                step="year",
                                 stepmode="backward",
                             ),
                             dict(step="all", label="全期間"),
@@ -278,7 +278,7 @@ class GitHubGanttChart:
             yref="paper",
             text=today,
             showarrow=False,
-            font=dict(color="red"),
+            font=dict(color="red", size=12, family="Arial Black"),
         )
 
         fig.show()
