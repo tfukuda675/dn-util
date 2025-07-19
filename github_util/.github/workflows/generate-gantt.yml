@@ -1,0 +1,55 @@
+name: Generate Gantt Chart
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner:
+        description: 'GitHub Owner/Organization'
+        required: true
+        default: 'your-username'
+      repo:
+        description: 'Repository Name'
+        required: true
+        default: 'your-repo'
+      project_number:
+        description: 'Project Number'
+        required: true
+        default: '1'
+  schedule:
+    # 毎日JST 9:00 (UTC 0:00) に実行
+    - cron: '0 0 * * *'
+
+jobs:
+  generate-chart:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        # GitHub Actions環境でのplotly表示設定
+        pip install kaleido
+        
+    - name: Generate Gantt Chart
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        OWNER: ${{ github.event.inputs.owner || 'tfukuda675' }}
+        REPO: ${{ github.event.inputs.repo || 'my_todo' }}
+        PROJECT_NUMBER: ${{ github.event.inputs.project_number || '4' }}
+      run: |
+        python draw_gantt_from_issue_and_project.py
+        
+    - name: Upload Gantt Chart
+      uses: actions/upload-artifact@v3
+      with:
+        name: gantt-chart-${{ github.run_number }}
+        path: gantt_chart.html
+        retention-days: 30

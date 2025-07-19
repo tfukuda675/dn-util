@@ -1,6 +1,7 @@
 #! /Users/tfuku/Tools/miniforge3/envs/py313/bin/python3
 
 import json
+import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -281,25 +282,32 @@ class GitHubGanttChart:
             font=dict(color="red", size=12, family="Arial Black"),
         )
 
-        fig.show()
+        # GitHub Actions環境ではHTMLファイルとして保存、ローカルでは表示
+        if os.getenv("GITHUB_ACTIONS"):
+            fig.write_html("gantt_chart.html")
+            print("ガントチャートをgantt_chart.htmlに保存しました")
+        else:
+            fig.show()
 
 
 def main():
-    # GitHub Personal Access Tokenをホームディレクトリから取得
-    path = Path("~/.github/token.json").expanduser()
-    token = None
+    # GitHub Actionsまたはローカル環境からトークンを取得
+    token = os.getenv("GITHUB_TOKEN")
 
-    # ファイルを読み込み
-    with path.open(encoding="utf-8") as f:
-        token = json.load(f)["token"]
     if not token:
-        print("~/.github/config.jsonを確認してください")
-        return
+        # ローカル環境の場合はファイルから読み込み
+        path = Path("~/.github/token.json").expanduser()
+        if path.exists():
+            with path.open(encoding="utf-8") as f:
+                token = json.load(f)["token"]
+        else:
+            print("GITHUB_TOKEN環境変数または~/.github/token.jsonを設定してください")
+            return
 
-    # 使用例
-    owner = "tfukuda675"  # GitHubユーザー名
-    repo = "my_todo"  # リポジトリ名
-    project_number = 4  # プロジェクト番号
+    # 環境変数またはデフォルト値を使用
+    owner = os.getenv("OWNER", "tfukuda675")
+    repo = os.getenv("REPO", "my_todo")
+    project_number = int(os.getenv("PROJECT_NUMBER", "4"))
 
     try:
         chart = GitHubGanttChart(token)
