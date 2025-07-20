@@ -1,0 +1,59 @@
+name: Generate Bug Curve
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner:
+        description: 'GitHub Owner/Organization'
+        required: true
+        default: 'your-username'
+      repo:
+        description: 'Repository Name'
+        required: true
+        default: 'your-repo'
+  schedule:
+    # 毎日JST 9:00 (UTC 0:00) に実行
+    - cron: '0 0 * * *'
+
+jobs:
+  generate-bug-curve:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        
+    - name: Generate Bug Curve
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        OWNER: ${{ github.event.inputs.owner || 'nsitexe' }}
+        REPO: ${{ github.event.inputs.repo || 'Design-SFM' }}
+      run: |
+        python generate_bug_curve_from_github_issues.py
+        
+    - name: Upload Bug Curve Chart
+      uses: actions/upload-artifact@v3
+      with:
+        name: bug-curve-chart-${{ github.run_number }}
+        path: |
+          bug_curve_stacked.html
+          *.csv
+        retention-days: 30
+        
+    - name: Upload to GitHub Pages (optional)
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
+        destination_dir: bug-curves
+        keep_files: true

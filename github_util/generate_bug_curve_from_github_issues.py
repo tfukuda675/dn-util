@@ -36,11 +36,28 @@ REPO = os.getenv("REPO", "Design-SFM")
 gh   = Github(TOKEN)
 repo = gh.get_repo(f"{OWNER}/{REPO}")
 
+def get_label_priority(df):
+    """ラベルの優先順位を計算（出現頻度が少ないほど高い優先度）"""
+    all_labels = [label for labels_list in df["labels"] for label in labels_list]
+    label_counts = pd.Series(all_labels).value_counts()
+    # 出現回数が少ないほど高い優先度（昇順でソート）
+    return label_counts.sort_values()
+
+def select_primary_label(labels, label_priority):
+    """複数ラベルから優先度が最も高い1つを選択"""
+    if not labels:
+        return "None"
+    
+    # 優先度順にソートして最初のラベルを返す
+    sorted_labels = sorted(labels, key=lambda x: label_priority.get(x, float('inf')))
+    return sorted_labels[0]
+
 def collect_issue_data():
     """Issue一覧を取得してデータフレームを作成"""
     issues = repo.get_issues(state="all")
     
-    data = []
+    # 第1パス: 全ラベルを収集してデータフレームを作成
+    temp_data = []
     for issue in issues:
         if issue.pull_request is not None:
             continue  # PR は除外
@@ -48,11 +65,30 @@ def collect_issue_data():
         # ラベルがない場合は"None"を追加
         if not labels:
             labels = ["None"]
-        print(f"Issue: {issue.title}, Labels: {labels}")
-        data.append({
+        temp_data.append({
             "created_at": issue.created_at.date(),
             "closed_at": issue.closed_at.date() if issue.closed_at else None,
             "labels": labels,
+            "title": issue.title,
+        })
+    
+    temp_df = pd.DataFrame(temp_data)
+    
+    # ラベルの優先順位を計算
+    label_priority = get_label_priority(temp_df)
+    print("ラベルの優先順位（出現回数少ない順）:")
+    print(label_priority)
+    
+    # 第2パス: 優先度に基づいて主要ラベルを選択
+    data = []
+    for row in temp_data:
+        primary_label = select_primary_label(row["labels"], label_priority)
+        print(f"Issue: {row['title']}, All Labels: {row['labels']}, Primary: {primary_label}")
+        data.append({
+            "created_at": row["created_at"],
+            "closed_at": row["closed_at"],
+            "primary_label": primary_label,
+            "all_labels": row["labels"],
         })
     
     df = pd.DataFrame(data)
@@ -63,10 +99,10 @@ def collect_issue_data():
 
 def get_unique_labels(df):
     """ユニークなラベル一覧を取得"""
-    all_labels = [label for labels_list in df["labels"] for label in labels_list]
-    unique_labels = list(set(all_labels))
-    # よく使われるラベル順にソート（頻度順）
-    label_counts = pd.Series(all_labels).value_counts()
+    # primary_labelカラムからユニークなラベルを取得
+    unique_labels = df["primary_label"].unique().tolist()
+    # 頻度順にソート
+    label_counts = df["primary_label"].value_counts()
     return label_counts.index.tolist()
 
 def create_label_timeline(df, unique_labels):
@@ -83,9 +119,9 @@ def create_label_timeline(df, unique_labels):
     timeline = pd.DataFrame(index=all_dates)
     
     for label in unique_labels:
-        # そのラベルを持つクローズされたIssueを抽出
+        # そのprimary_labelを持つクローズされたIssueを抽出
         label_issues = df[
-            (df["labels"].apply(lambda x: label in x)) & 
+            (df["primary_label"] == label) & 
             (df["closed_at"].notnull())
         ]
         
