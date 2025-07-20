@@ -35,6 +35,8 @@ venv.bak/
 # Output files
 *.html
 *.png
+*.csv
+*.json
 
 
 # Project
