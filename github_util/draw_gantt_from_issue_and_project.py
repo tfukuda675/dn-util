@@ -196,13 +196,48 @@ class GitHubGanttChart:
             df["type"], categories=["Actual", "Baseline"], ordered=True
         )
 
+        # 1. 明度差セット（推奨）
+
+        color_pairs = [
+            {"Baseline": "#E8F4FD", "Actual": "#1E88E5"},  # 薄青 → 濃青
+            {"Baseline": "#FFF3E0", "Actual": "#FF8F00"},  # 薄橙 → 濃橙
+            {"Baseline": "#E8F5E8", "Actual": "#4CAF50"},  # 薄緑 → 濃緑
+            {"Baseline": "#FCE4EC", "Actual": "#E91E63"},  # 薄ピンク → 濃ピンク
+            {"Baseline": "#F3E5F5", "Actual": "#9C27B0"},  # 薄紫 → 濃紫
+        ]
+
+        #  2. 寒暖色対比セット
+
+        color_pairs = [
+            {"Baseline": "#B0BEC5", "Actual": "#FF5722"},  # グレー → 暖色赤
+            {"Baseline": "#CFD8DC", "Actual": "#2196F3"},  # グレー → 寒色青
+            {"Baseline": "#F5F5F5", "Actual": "#4CAF50"},  # 薄グレー → 緑
+            {"Baseline": "#ECEFF1", "Actual": "#FF9800"},  # 薄グレー → 橙
+            {"Baseline": "#FAFAFA", "Actual": "#9C27B0"},  # 薄グレー → 紫
+        ]
+
+        #  3. パステル＋ビビッドセット
+
+        color_pairs = [
+            {"Baseline": "#FFCDD2", "Actual": "#D32F2F"},  # パステル赤 → ビビッド赤
+            {"Baseline": "#C8E6C9", "Actual": "#388E3C"},  # パステル緑 → ビビッド緑
+            {"Baseline": "#BBDEFB", "Actual": "#1976D2"},  # パステル青 → ビビッド青
+            {"Baseline": "#FFE0B2", "Actual": "#F57C00"},  # パステル橙 → ビビッド橙
+            {"Baseline": "#E1BEE7", "Actual": "#7B1FA2"},  # パステル紫 → ビビッド紫
+        ]
+
+        # 色セットの選択（明度差セット）
+        #color_map = {"Baseline": "#E8F4FD", "Actual": "#1E88E5"}
+        color_map = {"Baseline": "#BBDEFB", "Actual": "#1976D2"}
+        color_map = {"Baseline": "#FFCDD2", "Actual": "#D32F2F"}
+        
         fig = px.timeline(
             df,
             x_start="start",
             x_end="end",
             y="issue",
             color="type",
-            color_discrete_map={"Baseline": "lightgray", "Actual": "steelblue"},
+            color_discrete_map=color_map,
             category_orders={"type": ["Baseline", "Actual"]},
         )
 
