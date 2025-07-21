@@ -228,7 +228,9 @@ class GitHubGanttChart:
 
         # 色セットの選択（明度差セット）
         #color_map = {"Baseline": "#E8F4FD", "Actual": "#1E88E5"}
-        color_map = {"Baseline": "#BBDEFB", "Actual": "#1976D2"}
+        #color_map = {"Baseline": "#BBDEFB", "Actual": "#1976D2"}
+        #color_map = {"Baseline": "#FFCDD2", "Actual": "#D32F2F"}
+        color_map = {"Baseline": "#FFF3E0", "Actual": "#1E88E5"}
         color_map = {"Baseline": "#FFCDD2", "Actual": "#D32F2F"}
         
         fig = px.timeline(
