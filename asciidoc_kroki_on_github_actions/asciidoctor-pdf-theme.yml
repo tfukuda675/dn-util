@@ -1,0 +1,45 @@
+extends: default
+font:
+  catalog:
+    # 日本語フォントの設定
+    NotoSansCJK:
+      normal: /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc
+      bold: /usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc
+    NotoSerifCJK:
+      normal: /usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc
+      bold: /usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc
+  fallbacks:
+    - NotoSansCJK
+    - NotoSerifCJK
+page:
+  layout: portrait
+  margin: [0.5in, 0.67in, 0.67in, 0.67in]
+  size: A4
+base:
+  align: left
+  font_color: 333333
+  font_family: NotoSansCJK
+  font_size: 10.5
+  line_height_length: 12
+  line_height: $base_line_height_length / $base_font_size
+vertical_rhythm: $base_line_height_length
+horizontal_rhythm: $base_line_height_length
+title_page:
+  align: center
+  logo:
+    top: 10%
+  title:
+    top: 55%
+    font_size: floor($base_font_size * 2.6)
+    font_color: 181818
+    line_height: 0.9
+  subtitle:
+    font_size: floor($base_font_size * 1.45)
+    font_style: bold_italic
+    line_height: 1
+  authors:
+    margin_top: $base_font_size * 1.25
+    font_size: floor($base_font_size * 1.45)
+    font_color: 181818
+  revision:
+    margin_top: $base_font_size * 1.25
