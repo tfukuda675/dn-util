@@ -14,7 +14,7 @@ import pytz
 import requests
 
 
-class GitHubGanttChart:
+class GitHubDataFetcher:
     def __init__(self, token: str):
         self.token = token
         self.headers = {
@@ -149,6 +149,108 @@ class GitHubGanttChart:
 
         return start_date, end_date
 
+    def fetch_and_save_data(
+        self, owner: str, repo: str, project_number: int, output_file: str = None
+    ) -> str:
+        """GitHubプロジェクトやIssueからデータを取得してJSONファイルに保存"""
+        if output_file is None:
+            output_file = f"{repo}_gantt_data.json"
+            
+        items = self.get_project_items(owner, repo, project_number)
+        data: List[Dict] = []
+
+        for item in items:
+            content = item.get("content")
+            if not content:
+                continue
+
+            issue_title = content.get("title", "")
+            issue_body = content.get("body", "")
+            issue_number = content.get("number")
+            assignees = (
+                [a.get("login") for a in content.get("assignees", {}).get("nodes", [])]
+                if content.get("assignees")
+                else []
+            )
+
+            # issue_numberが存在しない場合はスキップ
+            if not issue_number:
+                continue
+
+            # 安全な文字列結合
+            issue_label = f"{issue_title}"
+
+            # Actualデータ（プロジェクトから）
+            actual_start, actual_end = self.extract_dates_from_project_item(item)
+
+            # 今日の日付を取得
+            today = datetime.now(pytz.timezone("Asia/Tokyo")).date()
+            ongoing = False
+
+            if actual_start:
+                if actual_end is None:
+                    actual_end = today.isoformat()
+                    ongoing = True
+                else:
+                    actual_end = actual_end
+
+                data.append(
+                    {
+                        "issue": issue_label,
+                        "type": "Actual",
+                        "start": actual_start,
+                        "end": actual_end,
+                        "assignees": ", ".join(assignees),
+                        "number": issue_number,
+                        "ongoing": ongoing,
+                    }
+                )
+
+            # Baselineデータ（Issueのbodyから）
+            roadmap_data = self.parse_roadmap_json(issue_body)
+            if roadmap_data:
+                baseline_start = roadmap_data.get("Baseline_Start_Date")
+                baseline_end = roadmap_data.get("Baseline_End_Date")
+
+                if baseline_start and baseline_end:
+                    data.append(
+                        {
+                            "issue": issue_label,
+                            "type": "Baseline",
+                            "start": baseline_start,
+                            "end": baseline_end,
+                            "assignees": ", ".join(assignees),
+                            "number": issue_number,
+                            "ongoing": False,
+                        }
+                    )
+
+        # JSONファイルに保存
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        print(f"データを{output_file}に保存しました")
+        return output_file
+
+
+class GanttChartRenderer:
+    def __init__(self):
+        pass
+
+    def load_data_from_json(self, json_file: str) -> pd.DataFrame:
+        """JSONファイルからデータを読み込みDataFrameに変換"""
+        with open(json_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        df = pd.DataFrame(data)
+        if not df.empty:
+            df["start"] = pd.to_datetime(df["start"]).dt.tz_localize("Asia/Tokyo")
+            df["end"] = pd.to_datetime(df["end"]).dt.tz_localize("Asia/Tokyo")
+            # issueでソート
+            df = df.sort_values("issue", ascending=True)
+
+        return df
+
     def create_gantt_data(
         self, df: pd.DataFrame, repo: str, owner: str
     ) -> pd.DataFrame:
@@ -202,87 +304,6 @@ class GitHubGanttChart:
 
         # issueでsort
         df = df.sort_values("issue", ascending=True)
-
-        return df
-
-    def issues_to_gantt_data(
-        self, owner: str, repo: str, project_number: int
-    ) -> pd.DataFrame:
-        """GitHubプロジェクトやIssueからデータを作成"""
-        items = self.get_project_items(owner, repo, project_number)
-        data: List[Dict] = []
-
-        for item in items:
-            content = item.get("content")
-            if not content:
-                continue
-
-            issue_title = content.get("title", "")
-            issue_body = content.get("body", "")
-            issue_number = content.get("number")
-            assignees = (
-                [a.get("login") for a in content.get("assignees", {}).get("nodes", [])]
-                if content.get("assignees")
-                else []
-            )
-
-            # issue_numberが存在しない場合はスキップ
-            if not issue_number:
-                continue
-
-            # 安全な文字列結合
-            issue_label = f"{issue_title}"
-
-            # Actualデータ（プロジェクトから）
-            actual_start, actual_end = self.extract_dates_from_project_item(item)
-
-            # 今日の日付を取得
-            # today = date.today()
-            today = datetime.now(pytz.timezone("Asia/Tokyo")).date()
-            ongoing = False
-
-            if actual_start:
-                if actual_end is None:
-                    actual_end = today
-                    ongoing = True
-
-                data.append(
-                    {
-                        "issue": issue_label,
-                        "type": "Actual",
-                        "start": actual_start,
-                        "end": actual_end,
-                        "assignees": ", ".join(assignees),
-                        "number": issue_number,
-                        "ongoing": ongoing,
-                    }
-                )
-
-            # Baselineデータ（Issueのbodyから）
-            roadmap_data = self.parse_roadmap_json(issue_body)
-            if roadmap_data:
-                baseline_start = roadmap_data.get("Baseline_Start_Date")
-                baseline_end = roadmap_data.get("Baseline_End_Date")
-
-                if baseline_start and baseline_end:
-                    data.append(
-                        {
-                            "issue": issue_label,
-                            "type": "Baseline",
-                            "start": baseline_start,
-                            "end": baseline_end,
-                            "assignees": ", ".join(assignees),
-                            "number": issue_number,
-                            "ongoing": False,
-                        }
-                    )
-
-        df = pd.DataFrame(data)
-        if not df.empty:
-            df["start"] = pd.to_datetime(df["start"]).dt.tz_localize("Asia/Tokyo")
-            df["end"] = pd.to_datetime(df["end"]).dt.tz_localize("Asia/Tokyo")
-            # issueでソート
-            df = df.sort_values("issue", ascending=True)
 
         return df
 
@@ -475,6 +496,12 @@ class GitHubGanttChart:
         )
         print(f"ガントチャートを{repo}_gantt_chart.htmlに保存しました")
 
+    def render_from_json(self, json_file: str, repo: str, owner: str) -> None:
+        """JSONファイルからガントチャートを生成"""
+        df = self.load_data_from_json(json_file)
+        df = self.create_gantt_data(df, repo, owner)
+        self.create_gantt_chart(df, repo, owner)
+
 
 def main():
     # GitHub Actionsまたはローカル環境からトークンを取得
@@ -496,10 +523,14 @@ def main():
     project_number = int(os.getenv("PROJECT_NUMBER", "4"))
 
     try:
-        chart = GitHubGanttChart(token)
-        df = chart.issues_to_gantt_data(owner, repo, project_number)
-        df = chart.create_gantt_data(df, repo, owner)
-        chart.create_gantt_chart(df, repo, owner)
+        # データ取得フェーズ
+        data_fetcher = GitHubDataFetcher(token)
+        json_file = data_fetcher.fetch_and_save_data(owner, repo, project_number)
+
+        # グラフ描画フェーズ
+        chart_renderer = GanttChartRenderer()
+        chart_renderer.render_from_json(json_file, repo, owner)
+
     except Exception as e:
         import traceback
 
