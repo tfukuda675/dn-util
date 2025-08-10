@@ -1,0 +1,28 @@
+= テストタイトル
+:author: tirple-3-packun
+:revnumber: 1.0
+:docdate: 2024-06-25
+:experimental:
+:toc: left
+:toclevels: 2
+:sectnums: |,all|
+:lang: ja
+
+== 見出し1
+
+ほげ
+
+[source, bash]
+----
+echo -n hoge && echo foo
+----
+
+[mermaid]
+----
+classDiagram
+    class Client {
+        +OS Windows
+    }
+----
+
+image:hoge.png[]

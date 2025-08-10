@@ -1,0 +1,42 @@
+#extends: default
+extends: default-with-font-fallbacks
+font:
+  catalog:
+    merge: true
+    #NotoSansCJK:
+    Helvetica:
+      normal: NotoSansCJKjp-Regular.otf
+      bold:   NotoSansCJKjp-Bold.otf
+page:
+  layout: portrait
+  margin: [0.5in, 0.67in, 0.67in, 0.67in]
+  size: A4
+base:
+  #font_family: NotoSansCJK
+  font_family: Helvetica
+  align: left
+  font_color: 333333
+  font_size: 10.5
+  line_height_length: 12
+  line_height: $base_line_height_length / $base_font_size
+vertical_rhythm: $base_line_height_length
+horizontal_rhythm: $base_line_height_length
+title_page:
+  align: center
+  logo:
+    top: 10%
+  title:
+    top: 55%
+    font_size: floor($base_font_size * 2.6)
+    font_color: 181818
+    line_height: 0.9
+  subtitle:
+    font_size: floor($base_font_size * 1.45)
+    font_style: bold_italic
+    line_height: 1
+  authors:
+    margin_top: $base_font_size * 1.25
+    font_size: floor($base_font_size * 1.45)
+    font_color: 181818
+  revision:
+    margin_top: $base_font_size * 1.25

@@ -1,0 +1,42 @@
+extends: default-with-font-fallbacks
+header:
+  height: 0.5in
+  line-height: 1
+  margin: [0, 0.3in, 0, 0.3in]
+  padding: [0.1in, 0, 0.1in, 0]
+  border-color: #DDDDDD
+  border-style: solid
+  border-width: 0.25
+  columns: <20% =0% >80%
+  recto:
+    left:
+      content: image:confidential_mark.png[fit=scale-down, position=center left]
+    right:
+      content: '{document-title} - Rev.{revnumber}'
+  verso:
+    left:
+      content: $header-recto-left-content
+    right:
+      content: $header-recto-right-content
+footer:
+  height: 0.5in
+  line-height: 1
+  margin: [0, 0.3in, 0, 0.3in]
+  padding: [0.1in, 0, 0.1in, 0]
+  border-color: #DDDDDD
+  border-style: double
+  border-width: 1
+  columns: <80% =0% >20%
+  recto:
+    left:
+      content: '(C) Copyright {docyear} Your company All rights reserved.'
+    right:
+      content: '{page-number} of {page-count}'
+  verso:
+    left:
+      content: $footer-recto-left-content
+    right:
+      content: $footer-recto-right-content
+page:
+  numbering:
+    start-at: toc

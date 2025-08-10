@@ -1,0 +1,167 @@
+= サンプルドキュメント
+作成者名 <author@example.com>
+v1.0, 2025-08-03
+:doctype: book
+:lang: ja
+:toc: left
+:toclevels: 3
+:sectnums:
+:kroki-server-url: http://localhost:8000
+:source-highlighter: rouge
+:pdf-themesdir: .
+:pdf-theme: asciidoctor-pdf-theme
+
+== はじめに
+
+このドキュメントは、AsciiDocからPDFへの変換システムのサンプルです。
+日本語フォントとKrokiを使用した図表生成機能をテストします。
+
+=== 目的
+
+* AsciiDocの基本的な機能の確認
+* 日本語フォントの表示テスト
+* Mermaid図表の生成確認
+* PlantUML図表の生成確認
+
+== システム概要
+
+=== アーキテクチャ図
+
+以下のMermaid図は、システムの全体的なアーキテクチャを示しています。
+
+[mermaid]
+....
+graph TD
+    A[AsciiDocファイル] --> B[GitHub Actions]
+    B --> C[Podman + Kroki]
+    C --> D[図表生成]
+    D --> E[AsciiDoctor PDF]
+    E --> F[PDF出力]
+
+    G[開発者] --> A
+    F --> H[成果物保存]
+....
+
+=== プロセスフロー
+
+次のPlantUML図は、変換プロセスの詳細なフローを表示します。
+
+[plantuml]
+....
+@startuml
+start
+:AsciiDocファイルをpush;
+:GitHub Actionsトリガー;
+:Podmanでkrokiコンテナ起動;
+:AsciiDoctor実行;
+if (図表が含まれているか?) then (はい)
+  :Krokiで図表生成;
+else (いいえ)
+  :図表生成をスキップ;
+endif
+:PDFファイル生成;
+:アーティファクトとして保存;
+stop
+@enduml
+....
+
+== 技術詳細
+
+=== 使用技術
+
+[cols="2,3,3"]
+|===
+|分類 |技術 |説明
+
+|文書作成
+|AsciiDoc
+|軽量マークアップ言語
+
+|図表生成
+|Kroki
+|各種図表フォーマットのレンダリング
+
+|コンテナ
+|Podman
+|Dockerの代替コンテナランタイム
+
+|CI/CD
+|GitHub Actions
+|自動化ワークフロー
+
+|PDF生成
+|AsciiDoctor PDF
+|AsciiDocからPDFへの変換
+|===
+
+=== 日本語対応
+
+このシステムでは以下の日本語対応を行っています：
+
+. *フォント設定*
+  * Noto Sans CJK（ゴシック体）
+  * Noto Serif CJK（明朝体）
+
+. *文字エンコーディング*
+  * UTF-8での処理
+
+. *レイアウト*
+  * A4サイズ対応
+  * 適切な行間設定
+
+== サンプルコード
+
+=== Python例
+
+[source,python]
+----
+def hello_world():
+    """日本語を含むサンプル関数"""
+    print("こんにちは、世界！")
+    return "Hello, World!"
+
+if __name__ == "__main__":
+    message = hello_world()
+    print(f"メッセージ: {message}")
+----
+
+=== Shell例
+
+[source,bash]
+----
+#!/bin/bash
+# PDFコンバーターの実行例
+
+echo "変換を開始します..."
+asciidoctor-pdf \
+  --theme asciidoctor-pdf-theme.yml \
+  --out-dir output \
+  docs/sample.adoc
+echo "変換が完了しました。"
+----
+
+image:hoge.png[]
+
+
+
+image:hoge.svg[]
+
+== まとめ
+
+このシステムにより、以下の機能が実現されています：
+
+* 日本語を含むAsciiDoc文書のPDF変換
+* MermaidやPlantUMLを使用した図表の自動生成
+* GitHub Actionsによる自動化されたビルドプロセス
+* Podmanを使用したコンテナベースの環境構築
+
+今後の拡張として、以下のような機能追加も検討できます：
+
+- [ ] 複数の文書ファイルの一括変換
+- [ ] カスタムテーマの追加
+- [ ] 他の図表フォーマットのサポート
+- [ ] メール通知機能
+
+WARNING: このシステムを使用する際は、Krokiサーバーが正常に起動していることを確認してください。
+
+NOTE: PDF生成時に日本語フォントが正しく適用されない場合は、フォントファイルのパスを確認してください。
