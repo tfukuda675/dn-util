@@ -1,5 +1,4 @@
 #extends: default
-extends: default-with-font-fallbacks
 font:
   catalog:
     merge: true
@@ -19,6 +18,9 @@ base:
   font_size: 10.5
   line_height_length: 12
   line_height: $base_line_height_length / $base_font_size
+code:
+  font-family: Helvetica
+  font-size: 10
 vertical_rhythm: $base_line_height_length
 horizontal_rhythm: $base_line_height_length
 title_page:

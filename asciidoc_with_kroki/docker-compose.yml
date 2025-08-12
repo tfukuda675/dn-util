@@ -1,14 +1,46 @@
 version: "3"
 services:
-  core:
-    image: yuzutech/kroki
+  kroki:
+    image: yuzutech/kroki:latest
+    depends_on:
+      - mermaid
     environment:
-      - KROKI_MERMAID_HOST=mermaid
-      - KROKI_BPMN_HOST=bpmn
-      - KROKI_EXCALIDRAW_HOST=excalidraw
+      KROKI_MERMAID_HOST: mermaid
+      KROKI_MERMAID_PORT: 8002
+      KROKI_MAX_URI_LENGTH: 16384 
+      XDG_CACHE_HOME: /tmp/.cache
+    command: sh -lc 'mkdir -p /tmp/.cache/fontconfig && exec /usr/bin/java -jar /kroki.jar'
+    container_name: kroki
     ports:
-      - "8000:8000"
+      - "8000:8000"               # （任意）ホストから参照したい場合
   mermaid:
     image: yuzutech/kroki-mermaid
     ports:
       - "8002:8002"
+
+  adoc:
+    build: .
+    image: asciidoctor-pdf-math-kroki:local
+    container_name: adoc
+    working_dir: /documents
+    environment:
+      - XDG_CACHE_HOME=/documents/.cache
+      - HOME=/documents
+    depends_on:
+      - kroki
+    volumes:
+      - ./docs:/documents
+      - ./scripts:/scripts:ro
+    # docs 配下の .adoc を全部、HTML + PDF に出力
+    command: |
+      sh -lc '
+        set -eu
+        # fontconfig キャッシュ先を作っておく
+        mkdir -p "/documents/.cache/fontconfig"
+        # 失敗しても処理は続行
+        fc-cache -f || true
+
+        /scripts/build.sh   # ← 外部スクリプト方式の場合
+        # もしくはここにインラインの変換ループ（$ は $$ にエスケープ）
+      '
+    user: "${UID:-1000}:${GID:-1000}"

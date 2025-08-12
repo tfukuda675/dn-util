@@ -9,18 +9,22 @@ export THEME="asciidoctor-pdf-theme.yml"
 export ADOC="sample.adoc"
 export OPDF="sample.pdf"
 
+            #-a source-highlighter=rouge \
+
 docker run \
     --rm \
     --network host \
     -v ./docs:/documents \
     -v ./fonts:/fonts \
-    asciidoctor/docker-asciidoctor \
+    asciidoctor-pdf-math \
         asciidoctor-pdf \
             -n -q \
             -b pdf \
             -d article \
             --theme /documents/${THEME} \
-            -a source-highlighter=rouge \
+            -a stem=latexmath \
+            -a docinfo=shared \
+            -a docinfodir=/documets \
             -a rouge-style=monokai \
             -a pdf-fontsdir=/fonts \
             -a scripts=cjk \

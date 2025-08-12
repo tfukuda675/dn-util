@@ -140,11 +140,26 @@ asciidoctor-pdf \
 echo "変換が完了しました。"
 ----
 
+
 image:hoge.png[]
 
 
 
 image:hoge.svg[]
+
+
+== 数式テスト
+:stem: latexmath
+:docinfo: shared
+
+本文中のインライン数式は stem:[E = mc^2] のように書けます。
+
+[stem]
+++++
+\[
+\int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+\]
+++++
 
 == まとめ
 
