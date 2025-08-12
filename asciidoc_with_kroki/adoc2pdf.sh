@@ -10,6 +10,7 @@ export ADOC="sample.adoc"
 export OPDF="sample.pdf"
 
             #-a source-highlighter=rouge \
+    #asciidoc_simple-asciidoctor \
 
 docker run \
     --rm \
@@ -29,6 +30,7 @@ docker run \
             -a pdf-fontsdir=/fonts \
             -a scripts=cjk \
             -a allow-uri-read \
+            -r asciidoctor-mathematical \
             -r asciidoctor-kroki \
                 -a kroki-server-url=http://localhost:8000 \
                 -a kroki-default-format=png \
