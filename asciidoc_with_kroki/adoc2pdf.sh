@@ -2,6 +2,8 @@
 
 set -eu
 
+# docker build -t asciidoctor-pdf-math .
+
 #export THEME="hoge.yml"
 #export ADOC="hoge.adoc"
 #export OPDF="hoge.pdf"
@@ -28,6 +30,27 @@ docker run \
             -a docinfodir=/documets \
             -a rouge-style=monokai \
             -a pdf-fontsdir=/fonts \
+            -a scripts=cjk \
+            -a allow-uri-read \
+            -r asciidoctor-mathematical \
+            -r asciidoctor-kroki \
+                -a kroki-server-url=http://localhost:8000 \
+                -a kroki-default-format=png \
+            /documents/${ADOC}
+
+docker run \
+    --rm \
+    --network host \
+    -v ./docs:/documents \
+    -v ./fonts:/fonts \
+    asciidoctor-pdf-math \
+        asciidoctor \
+            -n -q \
+            -d article \
+            -a stem=latexmath \
+            -a docinfo=shared \
+            -a docinfodir=/documets \
+            -a rouge-style=monokai \
             -a scripts=cjk \
             -a allow-uri-read \
             -r asciidoctor-mathematical \
