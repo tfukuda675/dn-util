@@ -20,7 +20,7 @@ services:
 
   adoc:
     build: .
-    image: asciidoctor-pdf-math-kroki:local
+    image: asciidoctor-pdf-math:local
     container_name: adoc
     working_dir: /documents
     environment:
