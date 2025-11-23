@@ -1,0 +1,28 @@
+= サンプル
+:stem: latexmath
+
+インライン数式: stem:[E = mc^2]
+
+[stem]
+++++
+\[
+\int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+\]
+++++
+
+== Mermaid 図
+[mermaid, format=svg]
+....
+graph TD
+  A[Start] --> B{OK?}
+  B -- Yes --> C[Ship]
+  B -- No  --> D[Fix]
+  D --> B
+....
+
+== PlantUML 図
+[plantuml, format=svg]
+....
+Alice -> Bob: Hello
+Bob --> Alice: Hi!
+....

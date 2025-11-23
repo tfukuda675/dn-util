@@ -31,7 +31,6 @@ docker run \
             -a rouge-style=monokai \
             -a pdf-fontsdir=/fonts \
             -a scripts=cjk \
-            -a allow-uri-read \
             -r asciidoctor-mathematical \
             -r asciidoctor-kroki \
                 -a kroki-server-url=http://localhost:8000 \
@@ -52,7 +51,6 @@ docker run \
             -a docinfodir=/documets \
             -a rouge-style=monokai \
             -a scripts=cjk \
-            -a allow-uri-read \
             -r asciidoctor-mathematical \
             -r asciidoctor-kroki \
                 -a kroki-server-url=http://localhost:8000 \
